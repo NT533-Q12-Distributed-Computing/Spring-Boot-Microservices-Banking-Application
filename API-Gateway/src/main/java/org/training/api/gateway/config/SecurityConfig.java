@@ -12,18 +12,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
-                .authorizeExchange()
-                //ALLOWING REGISTER API FOR DIRECT ACCESS
-                .pathMatchers("/api/users/register").permitAll()
-                //ALL OTHER APIS ARE AUTHENTICATED
-                .anyExchange().authenticated()
-                .and()
-                .csrf().disable()
-                .oauth2Login()
-                .and()
-                .oauth2ResourceServer()
-                .jwt();
+
+        // ❌ Disable CSRF (gateway không cần CSRF)
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable);
+
+        // ✅ Authorization rules
+        http.authorizeExchange(exchange -> exchange
+            // ⭐ BẮT BUỘC cho Docker / Kubernetes
+            .pathMatchers("/actuator/**").permitAll()
+
+            // Cho phép đăng ký user không cần login
+            .pathMatchers("/api/users/register").permitAll()
+
+            // Các request khác phải auth
+            .anyExchange().authenticated()
+        );
+
+        // ✅ OAuth2 login (browser redirect)
+        http.oauth2Login();
+
+        // ✅ OAuth2 Resource Server (JWT cho API)
+        http.oauth2ResourceServer(oauth2 -> oauth2.jwt());
+
         return http.build();
     }
 }
