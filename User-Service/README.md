@@ -188,3 +188,5 @@ JUnit and Mockito are used for unit and integration testing. These frameworks pr
 
 ## 🚀 Build and Deployment
 The project uses Maven for build automation and dependency management. The service can be packaged as a Docker container for deployment in a containerized environment.
+
+CI test trigger
